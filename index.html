@@ -359,6 +359,314 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mickeyzhou.github.io/blog/blog/2019/05/16/http-post请求详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MickeyZhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="前端技术笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/blog/2019/05/16/http-post请求详解/" class="post-title-link" itemprop="url">http post请求详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-16 19:36:14 / 修改时间：20:31:51" itemprop="dateCreated datePublished" datetime="2019-05-16T19:36:14+08:00">2019-05-16</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/http/" itemprop="url" rel="index"><span itemprop="name">http</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/blog/2019/05/16/http-post请求详解/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/05/16/http-post请求详解/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <!-- TOC -->
+<ul>
+<li><a href="#http-post%E8%AF%B7%E6%B1%82%E8%AF%A6%E8%A7%A3">http post请求详解</a>
+<ul>
+<li><a href="#http-%E5%8D%8F%E8%AE%AE-post%E8%AF%B7%E6%B1%82%E7%AE%80%E4%BB%8B">http 协议 post请求简介</a></li>
+<li><a href="#%E4%B8%89%E7%A7%8D%E5%B8%B8%E7%94%A8post%E8%AF%B7%E6%B1%82%E6%95%B0%E6%8D%AE%E7%BC%96%E7%A0%81%E6%96%B9%E5%BC%8F">三种常用post请求数据编码方式</a></li>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E7%AB%AF%E5%AE%9E%E7%8E%B0%E4%B8%89%E7%A7%8Dpost%E8%AF%B7%E6%B1%82%E6%96%B9%E5%BC%8F">浏览器端实现三种post请求方式</a></li>
+<li><a href="#node%E7%AB%AFrequest%E5%BA%93%E5%AE%9E%E7%8E%B0%E4%B8%89%E7%A7%8Dpost%E8%AF%B7%E6%B1%82">node端request库实现三种post请求</a></li>
+<li><a href="#node%E7%AB%AF%E8%A7%A3%E6%9E%90%E8%BF%99%E4%B8%89%E7%A7%8Dpost%E8%AF%B7%E6%B1%82%E6%95%B0%E6%8D%AE%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F">node端解析这三种post请求数据编码格式</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">参考资料</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+<h2>http post请求详解</h2>
+<h3>http 协议 post请求简介</h3>
+<ul>
+<li>
+<p>http请求分为三个部分： 状态行、 请求头、 消息体</p>
+<pre><code>  &lt;method&gt; &lt;request-URL&gt; &lt;version&gt;
+
+  &lt;headers&gt;
+
+  &lt;entity-body&gt;
+</code></pre>
+<p>协议规定 POST 提交的数据必须放在消息主体(entity-body）中，但协议并没有规定数据必须用
+什么编码方式。
+实际上，开发者完全可以自己决定消息主体的格式，只要最后发送的 HTTP 请求满足上面的格式就可以。消息发送出去后服务器根据请求头Content-Type中指定的mime 类型对消息提数据进行解析</p>
+</li>
+<li>
+<p>application/x-www-form-urlencoded</p>
+<pre><code>  POST http://www.example.com HTTP/1.1
+
+  Content-Type: application/x-www-form-urlencoded;charset=utf-8
+
+  title=test&amp;sub%5B%5D=1&amp;sub%5B%5D=2&amp;sub%5B%5D=3
+</code></pre>
+</li>
+<li>
+<p>application/json</p>
+<pre><code>  POST http://www.example.com HTTP/1.1
+
+  Content-Type: application/json;charset=utf-8
+
+  {&quot;title&quot;:&quot;test&quot;,&quot;sub&quot;:[1,2,3]}
+</code></pre>
+</li>
+<li>
+<p>multipart/form-data</p>
+<pre><code>  POST http://www.example.com HTTP/1.1
+  Content-Type:multipart/form-data;boundary=----WebKitFormBoundaryrGKCBY7qhFd3TrwA
+
+  ------WebKitFormBoundaryrGKCBY7qhFd3TrwA
+  Content-Disposition: form-data; name=&quot;text&quot;
+
+      title
+  ------WebKitFormBoundaryrGKCBY7qhFd3TrwA
+  Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;chrome.png&quot;
+  Content-Type: image/png
+
+  PNG ... content of chrome.png ...
+  ------WebKitFormBoundaryrGKCBY7qhFd3TrwA--
+</code></pre>
+</li>
+</ul>
+<h3>三种常用post请求数据编码方式</h3>
+<ul>
+<li>
+<p>application/x-www-form-urlencoded</p>
+</li>
+<li>
+<p>application/json</p>
+</li>
+<li>
+<p>multipart/form-data</p>
+</li>
+</ul>
+<h3>浏览器端实现三种post请求方式</h3>
+<ul>
+<li>form表单方式,只可以实现<code>application/x-www-form-urlencoded</code>和<code>multipart/form-data</code>两种数据编码方式</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- http post application/x-www-form-urlencoded --&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">form</span> <span class="attr">enctype</span>=<span class="string">"application/x-www-form-urlencoded"</span> <span class="attr">method</span>=<span class="string">"post"</span> <span class="attr">action</span>=<span class="string">"/form/update"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">"name"</span>&gt;</span>姓名：<span class="tag">&lt;/<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"name"</span> <span class="attr">id</span>=<span class="string">"name"</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">"address"</span>&gt;</span>地址：<span class="tag">&lt;/<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"address"</span> <span class="attr">id</span>=<span class="string">"address"</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">"avatar"</span>&gt;</span>头像： <span class="tag">&lt;/<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"pic"</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">button</span>&gt;</span>提交<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- http post multipart/form-data --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">enctype</span>=<span class="string">"multipart/form-data"</span> <span class="attr">method</span>=<span class="string">"post"</span> <span class="attr">action</span>=<span class="string">"/form/update"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">"name"</span>&gt;</span>姓名：<span class="tag">&lt;/<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"name"</span> <span class="attr">id</span>=<span class="string">"name"</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">"address"</span>&gt;</span>地址：<span class="tag">&lt;/<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"address"</span> <span class="attr">id</span>=<span class="string">"address"</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">"avatar"</span>&gt;</span>头像： <span class="tag">&lt;/<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"pic"</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">button</span>&gt;</span>提交<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>jquery实现三种post数据编码，jquery ajax post请求默认是以application/x-www-form-urlencoded编码方式</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//application/x-www-form-urlencoded</span></span><br><span class="line">       $(<span class="string">'#form-url-encode'</span>).click(<span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">           e.preventDefault();</span><br><span class="line">           $.ajax(&#123;</span><br><span class="line">               method: <span class="string">'post'</span>,</span><br><span class="line">               url: <span class="string">'/jquery/update'</span>,</span><br><span class="line">               data: &#123;</span><br><span class="line">                   name: $(<span class="string">"#name"</span>).val(),</span><br><span class="line">                   address: $(<span class="string">"#address"</span>).val()</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;).done(<span class="function"><span class="keyword">function</span> (<span class="params">res</span>) </span>&#123;</span><br><span class="line">               <span class="built_in">console</span>.log(res);</span><br><span class="line">           &#125;);</span><br><span class="line">       &#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// post application/json</span></span><br><span class="line">$(<span class="string">"#application-json"</span>).click(<span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            $.ajax(&#123;</span><br><span class="line">                method: <span class="string">'post'</span>,</span><br><span class="line">                contentType: <span class="string">'application/json'</span>,</span><br><span class="line">                url: <span class="string">'/jquery/update'</span>,</span><br><span class="line">                data: <span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">                    name: $(<span class="string">"#name"</span>).val(),</span><br><span class="line">                    address: $(<span class="string">"#address"</span>).val()</span><br><span class="line">                &#125;)</span><br><span class="line">            &#125;).done(<span class="function"><span class="keyword">function</span> (<span class="params">res</span>) </span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(res);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//multipart/form-data</span></span><br><span class="line">        $(<span class="string">"#multi-form-data"</span>).click(<span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            $.ajax(&#123;</span><br><span class="line">                method: <span class="string">'post'</span>,</span><br><span class="line">                contentType: <span class="literal">false</span>,</span><br><span class="line">                url: <span class="string">'/jquery/update'</span>,</span><br><span class="line">                data: <span class="keyword">new</span> FormData(jQuery(<span class="string">'form'</span>)[<span class="number">0</span>]),</span><br><span class="line">                processData: <span class="literal">false</span></span><br><span class="line">            &#125;).done(<span class="function"><span class="keyword">function</span> (<span class="params">res</span>) </span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(res);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>axios库实现三种post编码,axios库默认对data参数的js对象以application/json的格式进行编码</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http post application/x-www-form-urlencode</span></span><br><span class="line">$(<span class="string">'#form-url-encode'</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params">e</span>)</span>&#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            <span class="keyword">const</span> params = <span class="keyword">new</span> URLSearchParams();</span><br><span class="line">            params.append(<span class="string">'name'</span>, $(<span class="string">"#name"</span>).val());</span><br><span class="line">            params.append(<span class="string">'address'</span>, $(<span class="string">"#address"</span>).val());</span><br><span class="line"></span><br><span class="line">            axios(&#123;</span><br><span class="line">                method: <span class="string">'post'</span>,</span><br><span class="line">                url: <span class="string">'/axios/update'</span>,</span><br><span class="line">                headers: &#123;</span><br><span class="line">                    <span class="string">'content-type'</span>: <span class="string">'application/x-www-form-urlencoded'</span>    </span><br><span class="line">                &#125;,</span><br><span class="line">                data: params</span><br><span class="line">            &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">res</span>)</span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(res);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http post application/json编码</span></span><br><span class="line"> $(<span class="string">"#application-json"</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params">e</span>)</span>&#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            axios(&#123;</span><br><span class="line">                method: <span class="string">'post'</span>,</span><br><span class="line">                url: <span class="string">'/axios/update'</span>,</span><br><span class="line">                data: &#123;</span><br><span class="line">                    name: $(<span class="string">"#name"</span>).val(),</span><br><span class="line">                    address: $(<span class="string">"#address"</span>).val()</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">res</span>)</span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(res);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http post multipart/form-data</span></span><br><span class="line"> $(<span class="string">"#multi-form-data"</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params">e</span>)</span>&#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            axios(&#123;</span><br><span class="line">                method: <span class="string">'post'</span>,</span><br><span class="line">                headers: &#123;</span><br><span class="line">                    <span class="string">'content-type'</span>: <span class="string">'multipart/form-data'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                url: <span class="string">'/axios/update'</span>,</span><br><span class="line">                data: <span class="keyword">new</span> FormData(jQuery(<span class="string">'form'</span>)[<span class="number">0</span>]),</span><br><span class="line">            &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">res</span>)</span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(res);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<h3>node端request库实现三种post请求</h3>
+<ul>
+<li>实现 application/x-www-form-urlencoded编码:</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> request(&#123;</span><br><span class="line">    method: <span class="string">'POST'</span>,</span><br><span class="line">    url: <span class="string">'http://127.0.0.1:3000/save/json'</span>,</span><br><span class="line">    form: params,</span><br><span class="line">    json: <span class="literal">true</span></span><br><span class="line">&#125;, (err, res, body) =&gt; &#123;</span><br><span class="line">    http.json(body);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>实现 application/json 编码：</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> request(&#123;</span><br><span class="line">    method: <span class="string">'POST'</span>,</span><br><span class="line">    url: <span class="string">'http://127.0.0.1:3000/save/json'</span>,</span><br><span class="line">    body: params,</span><br><span class="line">    json: <span class="literal">true</span></span><br><span class="line">&#125;, (err, res, body) =&gt; &#123;</span><br><span class="line">    http.json(body);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>实现 multipart/form-data 编码：</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> request(&#123;</span><br><span class="line">    method: <span class="string">'POST'</span>,</span><br><span class="line">    url: <span class="string">'http://127.0.0.1:3000/upload'</span>,</span><br><span class="line">    formData: &#123;</span><br><span class="line">        ...params, </span><br><span class="line">        pic: fs.createReadStream(path) </span><br><span class="line">    &#125;,</span><br><span class="line">    json: <span class="literal">true</span></span><br><span class="line">&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">err, res, body</span>)</span>&#123;</span><br><span class="line">    http.json(body);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3>node端解析这三种post请求数据编码格式</h3>
+<ul>
+<li>koa框架实现， 通过<code>koa-body</code>中间件，可以解析这三种格式（注： <code>koa-bodyparser</code>只能解析<code>application/json</code> 和<code>application/x-www-form-urlencoded</code>两种格式，没法解析<code>multipart/form-data</code>格式）</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> koaBody = <span class="built_in">require</span>(<span class="string">'koa-body'</span>);</span><br><span class="line"><span class="comment">// config middleware</span></span><br><span class="line">app.use(koaBody(&#123;</span><br><span class="line">  multipart: <span class="literal">true</span>,</span><br><span class="line">  formLimit: <span class="string">'20mb'</span>,</span><br><span class="line">  formidable: &#123;</span><br><span class="line">      maxFileSize: <span class="number">200</span>*<span class="number">1024</span>*<span class="number">1024</span>    <span class="comment">// 设置上传文件大小最大限制，默认2M</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;));</span><br><span class="line"></span><br><span class="line"><span class="comment">//路由</span></span><br><span class="line">router.post(<span class="string">'/upload'</span>, <span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(ctx.request.body);</span><br><span class="line">  <span class="keyword">const</span> &#123; path, name &#125; = ctx.request.files &amp;&amp; ctx.request.files.pic;</span><br><span class="line">  <span class="keyword">const</span> reader = fs.createReadStream(path);</span><br><span class="line">  <span class="keyword">const</span> ext = name.split(<span class="string">'.'</span>).pop();</span><br><span class="line">  <span class="keyword">const</span> writer = fs.createWriteStream(<span class="string">`upload/<span class="subst">$&#123;<span class="built_in">Math</span>.random().toString()&#125;</span>.<span class="subst">$&#123;ext&#125;</span>`</span>);</span><br><span class="line">  reader.pipe(writer);</span><br><span class="line">  <span class="comment">// console.log(ctx.request.body);</span></span><br><span class="line">  ctx.body = <span class="string">'success'</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>thinkjs框架，thinkjs默认不需要配置就支持这三种post数据编码格式</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">updateAction(http)&#123;</span><br><span class="line">    <span class="keyword">let</span> params = http.post();</span><br><span class="line">    <span class="keyword">let</span> &#123; path, originalFilename &#125; = <span class="keyword">this</span>.file(<span class="string">'pic'</span>);</span><br><span class="line">    <span class="keyword">if</span>(path)&#123;</span><br><span class="line">      <span class="keyword">const</span> reader = fs.createReadStream(path);</span><br><span class="line">      <span class="keyword">const</span> writer = fs.createWriteStream(<span class="string">`upload/<span class="subst">$&#123;originalFilename&#125;</span>`</span>);</span><br><span class="line">      reader.pipe(writer);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(params)&#123;</span><br><span class="line">      <span class="keyword">this</span>.success(params);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">      <span class="keyword">this</span>.fail();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h3>参考资料</h3>
+<ul>
+<li>
+<p><a href="https://moxo.io/blog/2016/11/12/html-form-submit-urlencode-and-multipart-formdata/#application-x-www-form-urlencoded" target="_blank" rel="noopener">表单提交中的 x-www-form-urlencoded 和 multipart/form-data</a></p>
+</li>
+<li>
+<p><a href="https://imququ.com/post/four-ways-to-post-data-in-http.html" target="_blank" rel="noopener">四种常见的 POST 提交数据方式</a></p>
+</li>
+<li>
+<p><a href="http://www.ptbird.cn/koa-body.html" target="_blank" rel="noopener">koa2 使用 koa-body 代替 koa-bodyparser 和 koa-multer</a></p>
+</li>
+<li>
+<p><a href="https://stackoverflow.com/questions/5392344/sending-multipart-formdata-with-jquery-ajax" target="_blank" rel="noopener">Sending multipart/formdata with jQuery.ajax</a></p>
+</li>
+<li>
+<p><a href="https://github.com/request/request" target="_blank" rel="noopener">request/request</a></p>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://mickeyzhou.github.io/blog/blog/2019/05/07/使用vscode写markdown总结/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1792,7 +2100,7 @@
                 
                   <a href="/blog/archives/">
                 
-                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-count">7</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1815,7 +2123,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">3</span>
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1850,7 +2160,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">9</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1874,7 +2188,7 @@
           
           <div class="category-all-page">
 		<div class="category-all">
-		  <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Hexo/">Hexo</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Markdown/">Markdown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/工具使用/">工具使用</a><span class="category-list-count">1</span></li></ul>
+		  <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Hexo/">Hexo</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/Markdown/">Markdown</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/http/">http</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/blog/categories/工具使用/">工具使用</a><span class="category-list-count">1</span></li></ul>
 		</div>
 	</div>
 
